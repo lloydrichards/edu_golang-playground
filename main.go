@@ -3,25 +3,26 @@ package main
 import "fmt"
 
 func main() {
-	// For loop
-	for i := 0; i < 5; i++ {
-		fmt.Println(i)
-	}
+	result := add(1, 2)
+	println(result)
 
-	// While loop
-	j := 0
-	for j < 5 {
-		fmt.Println(j)
-		j++
+	a, err := divide(10, 0)
+	if err != nil {
+		println(err.Error())
+	} else {
+		println(a)
 	}
+}
 
-	// Infinite loop
-	k := 0
-	for {
-		fmt.Println(k)
-		k++
-		if k == 5 {
-			break
-		}
+// define a function that takes two integers and returns an integer
+func add(x, y int) int {
+	return x + y
+}
+
+// error handling in functions
+func divide(x, y int) (int, error) {
+	if y == 0 {
+		return 0, fmt.Errorf("cannot divide by zero")
 	}
+	return x / y, nil
 }

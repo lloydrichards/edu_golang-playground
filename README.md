@@ -10,3 +10,5 @@ Space to play around with Go, learn the basics, and document my progress.
        variables and how to use them in Go.
 1. [x] **Loops** -- (2024-03-09) -- Learned how to create loops using the `for`
        keyword.
+1. [x] **Functions** -- (2024-03-09) -- Learned how to create functions and
+       handle errors in Go.

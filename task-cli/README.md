@@ -10,7 +10,7 @@ tasks
 
 ## Requirements
 
-Should be able to perform crud operations via a cli on a data file oftasks. The
+Should be able to perform crud operations via a cli on a data file of tasks. The
 operations should be as follows:
 
 ```bash
@@ -65,7 +65,7 @@ ID    Task                                                Created          Done
 To mark a task as done, add in the following method
 
 ```bash
-$ tasks complete <taskid>
+tasks complete <taskid>
 ```
 
 ### Delete
@@ -73,7 +73,7 @@ $ tasks complete <taskid>
 The following method should be implemented to delete a task from the data store
 
 ```bash
-$ tasks delete <taskid>
+tasks delete <taskid>
 ```
 
 ## Notable Packages Used

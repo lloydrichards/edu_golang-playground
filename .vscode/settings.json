@@ -1,3 +1,3 @@
 {
-  "conventionalCommits.scopes": ["progress", "calculator-api"]
+  "conventionalCommits.scopes": ["progress", "calculator-api", "task-cli"]
 }

@@ -1,10 +1,11 @@
 package main
 
 import (
-	"calculator_api/handlers"
 	"log"
 	"net/http"
 	"time"
+
+	"github.com/lloydrichards/calculator_api/internal/handlers"
 )
 
 func middleware(next http.Handler) http.Handler {

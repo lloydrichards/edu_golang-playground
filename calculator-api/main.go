@@ -3,7 +3,16 @@ package main
 import (
 	"log"
 	"net/http"
+	"time"
 )
+
+func middleware(next http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		start := time.Now()
+		next.ServeHTTP(w, r)
+		log.Printf("%s %s %v", r.Method, r.URL.Path, time.Since(start))
+	})
+}
 
 func main() {
 	router := http.NewServeMux()
@@ -15,7 +24,7 @@ func main() {
 
 	server := http.Server{
 		Addr:    ":8080",
-		Handler: router,
+		Handler: middleware(router),
 	}
 
 	log.Println("Starting the server on http://localhost:8080")

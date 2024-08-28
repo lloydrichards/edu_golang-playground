@@ -1,7 +1,56 @@
+### Add: Valid value
 GET http://localhost:8080/add
 Content-Type: application/json
 
 {
   "value1": 12234,
   "value2": 27789
+}
+
+### Add: Invalid Request
+GET http://localhost:8080/add
+Content-Type: application/json
+
+{
+  "value1": "12234",
+  "value2": 27789
+}
+
+### Subtract: Valid value
+
+GET http://localhost:8080/subtract
+Content-Type: application/json
+
+{
+  "value1": 12234,
+  "value2": 27789
+}
+
+### Subtract: Valid value
+
+GET http://localhost:8080/multiply
+Content-Type: application/json
+
+{
+  "value1": 12234,
+  "value2": 27789
+}
+
+### Divide: Valid value
+
+GET http://localhost:8080/divide
+Content-Type: application/json
+
+{
+  "value1": 12234,
+  "value2": 27789
+} 
+
+### Divide: Invalid value
+GET http://localhost:8080/divide
+Content-Type: application/json
+
+{
+  "value1": 12234,
+  "value2": 0
 }

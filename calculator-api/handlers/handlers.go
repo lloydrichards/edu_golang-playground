@@ -11,37 +11,50 @@ type Body struct {
 }
 
 func HandleAdd(w http.ResponseWriter, r *http.Request) {
-
-	// get the request body
-	var body Body
-	err := json.NewDecoder(r.Body).Decode(&body)
+	body, err := getBody(r)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
 	}
-
-	// add the values
 	result := body.Value1 + body.Value2
 
 	writeResponse(w, float32(result))
 }
 
 func HandleSubtract(w http.ResponseWriter, r *http.Request) {
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(http.StatusOK)
-	w.Write([]byte(`{"message": "subtract"}`))
+	body, err := getBody(r)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
+	}
+	result := body.Value1 - body.Value2
+
+	writeResponse(w, float32(result))
 }
 
 func HandleMultiply(w http.ResponseWriter, r *http.Request) {
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(http.StatusOK)
-	w.Write([]byte(`{"message": "multiply"}`))
+	body, err := getBody(r)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
+	}
+	result := body.Value1 * body.Value2
+
+	writeResponse(w, float32(result))
 }
 
 func HandleDivide(w http.ResponseWriter, r *http.Request) {
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(http.StatusOK)
-	w.Write([]byte(`{"message": "divide"}`))
+	body, err := getBody(r)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
+	}
+
+	if body.Value2 == 0 {
+		http.Error(w, "cannot divide by zero", http.StatusBadRequest)
+		return
+	}
+	
+	result := body.Value1 / body.Value2
+
+	writeResponse(w, float32(result))
 }
 
 func HandleSum(w http.ResponseWriter, r *http.Request) {
@@ -51,6 +64,12 @@ func HandleSum(w http.ResponseWriter, r *http.Request) {
 }
 
 // --- Helper functions ---
+
+func getBody(r *http.Request) (Body, error) {
+	var body Body
+	err := json.NewDecoder(r.Body).Decode(&body)
+	return body, err
+}
 
 func writeResponse(
 	w http.ResponseWriter,

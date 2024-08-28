@@ -1,3 +1,3 @@
-module lloydrichardsdesign.com/golang-playground
+module edu_playground
 
-go 1.22.1
+go 1.23.0

@@ -24,7 +24,6 @@ func main() {
 	router.HandleFunc("/subtract", handlers.HandleSubtract)
 	router.HandleFunc("/multiply", handlers.HandleMultiply)
 	router.HandleFunc("/divide", handlers.HandleDivide)
-	router.HandleFunc("/sum", handlers.HandleSum)
 
 	server := http.Server{
 		Addr:    ":8080",

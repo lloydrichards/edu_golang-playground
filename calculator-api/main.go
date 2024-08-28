@@ -1,6 +1,7 @@
 package main
 
 import (
+	"calculator_api/handlers"
 	"log"
 	"net/http"
 	"time"
@@ -15,12 +16,14 @@ func middleware(next http.Handler) http.Handler {
 }
 
 func main() {
+
 	router := http.NewServeMux()
-	router.HandleFunc("/hello", func(w http.ResponseWriter, r *http.Request) {
-		w.Header().Set("Content-Type", "application/json")
-		w.WriteHeader(http.StatusOK)
-		w.Write([]byte(`{"message": "hello world"}`))
-	})
+
+	router.HandleFunc("/add", handlers.HandleAdd)
+	router.HandleFunc("/subtract", handlers.HandleSubtract)
+	router.HandleFunc("/multiply", handlers.HandleMultiply)
+	router.HandleFunc("/divide", handlers.HandleDivide)
+	router.HandleFunc("/sum", handlers.HandleSum)
 
 	server := http.Server{
 		Addr:    ":8080",

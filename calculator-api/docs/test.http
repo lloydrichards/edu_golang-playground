@@ -1,0 +1,7 @@
+GET http://localhost:8080/add
+Content-Type: application/json
+
+{
+  "value1": 12234,
+  "value2": 27789
+}

@@ -5,4 +5,4 @@ build:
 dev: build
 	go run .
 dev-api: build
-	go run ./calculator-api/main.go
+	cd calculator-api && go run *.go

@@ -39,7 +39,7 @@ func SetupPath() string {
 }
 
 func (t *taskDB) tableExists(name string) bool {
-	if _, err := t.db.Query("SELECT * FROM $1", name); err == nil {
+	if _, err := t.DB.Query("SELECT * FROM tasks"); err == nil {
 		return true
 	}
 	return false

@@ -40,7 +40,7 @@ func mkStatus(i int) string {
 }
 
 type task struct {
-	ID          uint
+	ID          int
 	Description string
 	Status      string
 	Created     time.Time
@@ -48,6 +48,6 @@ type task struct {
 }
 
 type taskDB struct {
-	db      *sql.DB
-	dataDir string
+	DB      *sql.DB
+	DataDir string
 }

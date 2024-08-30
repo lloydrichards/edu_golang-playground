@@ -47,10 +47,10 @@ func TestGetTask(t *testing.T) {
 		t.Run("get task: "+tc.want.Description, func(t *testing.T) {
 			mockDB := setup()
 			defer teardown(mockDB)
-			if err := mockDB.createTask(tc.want.Description); err != nil {
+			if err := mockDB.CreateTask(tc.want.Description); err != nil {
 				t.Fatalf("we ran into an unexpected error: %v", err)
 			}
-			task, err := mockDB.getTask(tc.want.ID)
+			task, err := mockDB.GetTask(tc.want.ID)
 			fmt.Print(task)
 			if err != nil {
 				t.Fatalf("we ran into an unexpected error: %v", err)
@@ -69,7 +69,7 @@ func TestGetTasks(t *testing.T) {
 	t.Run("get all tasks", func(t *testing.T) {
 		mockDB := setup()
 		defer teardown(mockDB)
-		tasks, err := mockDB.getTasks()
+		tasks, err := mockDB.GetTasks()
 		if err != nil {
 			t.Fatalf("we ran into an unexpected error: %v", err)
 		}
@@ -99,14 +99,11 @@ func TestDeleteTask(t *testing.T) {
 		t.Run("delete task: "+tc.want.Description, func(t *testing.T) {
 			mockDB := setup()
 			defer teardown(mockDB)
-			if err := mockDB.createTask(tc.want.Description); err != nil {
-				t.Fatalf("we ran into an unexpected error: %v", err)
-			}
-			err := mockDB.deleteTask(tc.want.ID)
+			err := mockDB.DeleteTask(tc.want.ID)
 			if err != nil {
 				t.Fatalf("we ran into an unexpected error: %v", err)
 			}
-			_, err = mockDB.getTask(tc.want.ID)
+			_, err = mockDB.GetTask(tc.want.ID)
 			if err == nil {
 				t.Fatalf("task was not deleted")
 			}
@@ -150,19 +147,16 @@ func TestUpdateTask(t *testing.T) {
 		t.Run("update task: "+tc.after.Description, func(t *testing.T) {
 			mockDB := setup()
 			defer teardown(mockDB)
-			if err := mockDB.createTask(tc.before.Description); err != nil {
-				t.Fatalf("we ran into an unexpected error: %v", err)
-			}
 			status, err := StatusFromString(tc.after.Status)
 			if err != nil {
 				t.Fatalf("The status is invalid: %v", err)
 			}
 
-			err = mockDB.updateTask(tc.after.ID, tc.after.Description, status)
+			err = mockDB.UpdateTask(tc.after.ID, tc.after.Description, status)
 			if err != nil {
 				t.Fatalf("Failed to update task: %v", err)
 			}
-			task, err := mockDB.getTask(tc.after.ID)
+			task, err := mockDB.GetTask(tc.after.ID)
 			if err != nil {
 				t.Fatalf("Failed to get task: %v", err)
 			}
@@ -195,7 +189,7 @@ func setup() *taskDB {
 	}
 
 	for _, task := range mockTasks {
-		err := t.createTask(task.Description)
+		err := t.CreateTask(task.Description)
 		if err != nil {
 			log.Fatal(err)
 		}
@@ -204,6 +198,6 @@ func setup() *taskDB {
 }
 
 func teardown(tDB *taskDB) {
-	tDB.db.Close()
-	os.Remove(tDB.dataDir)
+	tDB.DB.Close()
+	os.Remove(tDB.DataDir)
 }

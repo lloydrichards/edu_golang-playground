@@ -2,6 +2,7 @@ package db
 
 import (
 	"database/sql"
+	"os"
 	"path/filepath"
 
 	_ "github.com/mattn/go-sqlite3"
@@ -22,6 +23,10 @@ func OpenDB(path string) (*taskDB, error) {
 	return &t, nil
 }
 
+func DeleteDB(path string) error {
+	return os.Remove(filepath.Join(path, "tasks.db"))
+}
+
 func (t *taskDB) createTable() error {
 	sqlStmt := `
 		CREATE TABLE tasks (
@@ -32,38 +37,38 @@ func (t *taskDB) createTable() error {
 			"updated" DATETIME
 		)`
 
-	_, err := t.db.Exec(sqlStmt)
+	_, err := t.DB.Exec(sqlStmt)
 	return err
 }
 
-func (t *taskDB) createTask(name string) error {
+func (t *taskDB) CreateTask(name string) error {
 	sqlStmt := `
 		INSERT INTO tasks (description, status)
 		VALUES ($1, $2)`
 
-	_, err := t.db.Exec(sqlStmt,
+	_, err := t.DB.Exec(sqlStmt,
 		name,
 		todo.String(),
 	)
 	return err
 }
 
-func (t *taskDB) updateTask(id uint, name string, statusIdx int) error {
+func (t *taskDB) UpdateTask(id int, name string, statusIdx int) error {
 	sqlStmt := `
 		UPDATE tasks
 		SET description = $1, status = $2, updated = CURRENT_TIMESTAMP
 		WHERE id = $3`
 
 	statusStr := mkStatus(statusIdx)
-	_, err := t.db.Exec(sqlStmt, name, statusStr, id)
+	_, err := t.DB.Exec(sqlStmt, name, statusStr, id)
 	return err
 }
 
-func (t *taskDB) getTasks() ([]task, error) {
+func (t *taskDB) GetTasks() ([]task, error) {
 	sqlStmt := `
 		SELECT * FROM tasks`
 
-	rows, err := t.db.Query(sqlStmt)
+	rows, err := t.DB.Query(sqlStmt)
 	if err != nil {
 		return nil, err
 	}
@@ -86,13 +91,13 @@ func (t *taskDB) getTasks() ([]task, error) {
 	return tasks, nil
 }
 
-func (t *taskDB) getTask(id uint) (task, error) {
+func (t *taskDB) GetTask(id int) (task, error) {
 	var task task
 	sqlStmt := `
 		SELECT * FROM tasks
 		WHERE id = $1`
 
-	err := t.db.QueryRow(sqlStmt, id).
+	err := t.DB.QueryRow(sqlStmt, id).
 		Scan(
 			&task.ID,
 			&task.Description,
@@ -103,11 +108,11 @@ func (t *taskDB) getTask(id uint) (task, error) {
 	return task, err
 }
 
-func (t *taskDB) deleteTask(id uint) error {
+func (t *taskDB) DeleteTask(id int) error {
 	sqlStmt := `
 		DELETE FROM tasks
 		WHERE id = $1`
 
-	_, err := t.db.Exec(sqlStmt, id)
+	_, err := t.DB.Exec(sqlStmt, id)
 	return err
 }

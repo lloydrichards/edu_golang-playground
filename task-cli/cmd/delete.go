@@ -1,13 +1,15 @@
 package cmd
 
 import (
+	"strconv"
+
 	"github.com/lloydrichards/task/db"
 	"github.com/spf13/cobra"
 )
 
-var addCmd = &cobra.Command{
-	Use:   "add",
-	Short: "Add a new task to your task list",
+var delete = &cobra.Command{
+	Use:   "delete",
+	Short: "Delete a task from your task list",
 	Args:  cobra.ExactArgs(1),
 	RunE: func(cmd *cobra.Command, args []string) error {
 		t, err := db.OpenDB(db.SetupPath())
@@ -16,7 +18,12 @@ var addCmd = &cobra.Command{
 		}
 		defer t.DB.Close()
 
-		if err := t.CreateTask(args[0]); err != nil {
+		id, err := strconv.Atoi(args[0])
+		if err != nil {
+			return err
+		}
+
+		if err := t.DeleteTask(id); err != nil {
 			return err
 		}
 		return nil
@@ -24,5 +31,5 @@ var addCmd = &cobra.Command{
 }
 
 func init() {
-	rootCmd.AddCommand(addCmd)
+	rootCmd.AddCommand(delete)
 }

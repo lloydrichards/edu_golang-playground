@@ -16,9 +16,12 @@ var addCmd = &cobra.Command{
 		}
 		defer t.DB.Close()
 
-		if err := t.CreateTask(args[0]); err != nil {
+		task, err := t.CreateTask(args[0])
+		if err != nil {
 			return err
 		}
+
+		printTable([]db.Task{task})
 		return nil
 	},
 }

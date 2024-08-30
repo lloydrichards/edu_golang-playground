@@ -10,7 +10,7 @@ import (
 	"testing"
 )
 
-var mockTasks = []task{
+var mockTasks = []Task{
 	{
 		ID:          1,
 		Description: "get milk",
@@ -30,7 +30,7 @@ var mockTasks = []task{
 
 func TestGetTask(t *testing.T) {
 	tests := []struct {
-		want task
+		want Task
 	}{
 		{
 			want: mockTasks[0],
@@ -47,7 +47,8 @@ func TestGetTask(t *testing.T) {
 		t.Run("get task: "+tc.want.Description, func(t *testing.T) {
 			mockDB := setup()
 			defer teardown(mockDB)
-			if err := mockDB.CreateTask(tc.want.Description); err != nil {
+			_, err := mockDB.CreateTask(tc.want.Description)
+			if err != nil {
 				t.Fatalf("we ran into an unexpected error: %v", err)
 			}
 			task, err := mockDB.GetTask(tc.want.ID)
@@ -82,7 +83,7 @@ func TestGetTasks(t *testing.T) {
 
 func TestDeleteTask(t *testing.T) {
 	tests := []struct {
-		want task
+		want Task
 	}{
 		{
 			want: mockTasks[0],
@@ -113,12 +114,12 @@ func TestDeleteTask(t *testing.T) {
 
 func TestUpdateTask(t *testing.T) {
 	tests := []struct {
-		before task
-		after  task
+		before Task
+		after  Task
 	}{
 		{
 			before: mockTasks[0],
-			after: task{
+			after: Task{
 				ID:          mockTasks[0].ID,
 				Description: "new description",
 				Status:      mockTasks[0].Status,
@@ -126,7 +127,7 @@ func TestUpdateTask(t *testing.T) {
 		},
 		{
 			before: mockTasks[1],
-			after: task{
+			after: Task{
 				ID:          mockTasks[1].ID,
 				Description: mockTasks[1].Description,
 				Status:      inProgress.String(),
@@ -134,7 +135,7 @@ func TestUpdateTask(t *testing.T) {
 		},
 		{
 			before: mockTasks[2],
-			after: task{
+			after: Task{
 				ID:          mockTasks[2].ID,
 				Description: mockTasks[2].Description,
 				Status:      done.String(),
@@ -189,7 +190,7 @@ func setup() *taskDB {
 	}
 
 	for _, task := range mockTasks {
-		err := t.CreateTask(task.Description)
+		_, err := t.CreateTask(task.Description)
 		if err != nil {
 			log.Fatal(err)
 		}

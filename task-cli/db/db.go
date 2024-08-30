@@ -41,16 +41,24 @@ func (t *taskDB) createTable() error {
 	return err
 }
 
-func (t *taskDB) CreateTask(name string) error {
+func (t *taskDB) CreateTask(name string) (Task, error) {
 	sqlStmt := `
 		INSERT INTO tasks (description, status)
 		VALUES ($1, $2)`
 
-	_, err := t.DB.Exec(sqlStmt,
-		name,
-		todo.String(),
-	)
-	return err
+	result, err := t.DB.Exec(sqlStmt, name, todo.String())
+	if err != nil {
+		return Task{}, err
+	}
+	taskID, err := result.LastInsertId()
+	if err != nil {
+		return Task{}, err
+	}
+	task, err := t.GetTask(int(taskID))
+	if err != nil {
+		return Task{}, err
+	}
+	return task, nil
 }
 
 func (t *taskDB) UpdateTask(id int, name string, statusIdx int) error {
@@ -64,7 +72,7 @@ func (t *taskDB) UpdateTask(id int, name string, statusIdx int) error {
 	return err
 }
 
-func (t *taskDB) GetTasks() ([]task, error) {
+func (t *taskDB) GetTasks() ([]Task, error) {
 	sqlStmt := `
 		SELECT * FROM tasks`
 
@@ -73,9 +81,9 @@ func (t *taskDB) GetTasks() ([]task, error) {
 		return nil, err
 	}
 
-	var tasks []task
+	var tasks []Task
 	for rows.Next() {
-		var t task
+		var t Task
 		err = rows.Scan(
 			&t.ID,
 			&t.Description,
@@ -91,8 +99,8 @@ func (t *taskDB) GetTasks() ([]task, error) {
 	return tasks, nil
 }
 
-func (t *taskDB) GetTask(id int) (task, error) {
-	var task task
+func (t *taskDB) GetTask(id int) (Task, error) {
+	var task Task
 	sqlStmt := `
 		SELECT * FROM tasks
 		WHERE id = $1`

@@ -1,8 +1,6 @@
 package cmd
 
 import (
-	"fmt"
-
 	"github.com/lloydrichards/task/db"
 	"github.com/spf13/cobra"
 )
@@ -20,7 +18,7 @@ var listCmd = &cobra.Command{
 		if err != nil {
 			return err
 		}
-		fmt.Print(tasks)
+		printTable(tasks)
 		return nil
 	},
 }

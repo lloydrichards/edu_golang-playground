@@ -39,7 +39,7 @@ func mkStatus(i int) string {
 	return [...]string{"todo", "in progress", "done"}[i]
 }
 
-type task struct {
+type Task struct {
 	ID          int
 	Description string
 	Status      string

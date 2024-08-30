@@ -36,7 +36,7 @@ func (t *taskDB) createTable() error {
 	return err
 }
 
-func (t *taskDB) insert(name string) error {
+func (t *taskDB) createTask(name string) error {
 	sqlStmt := `
 		INSERT INTO tasks (description, status)
 		VALUES ($1, $2)`
@@ -45,6 +45,17 @@ func (t *taskDB) insert(name string) error {
 		name,
 		todo.String(),
 	)
+	return err
+}
+
+func (t *taskDB) updateTask(id uint, name string, statusIdx int) error {
+	sqlStmt := `
+		UPDATE tasks
+		SET description = $1, status = $2, updated = CURRENT_TIMESTAMP
+		WHERE id = $3`
+
+	statusStr := mkStatus(statusIdx)
+	_, err := t.db.Exec(sqlStmt, name, statusStr, id)
 	return err
 }
 

@@ -2,19 +2,41 @@ package db
 
 import (
 	"database/sql"
+	"fmt"
 	"time"
 )
 
-type status int
+type Status int
 
 const (
-	todo status = iota
+	todo Status = iota
 	inProgress
 	done
 )
 
-func (s status) String() string {
+func (s Status) String() string {
 	return [...]string{"todo", "in progress", "done"}[s]
+}
+
+func (s Status) Int() int {
+	return int(s)
+}
+
+func StatusFromString(str string) (int, error) {
+	switch str {
+	case "todo":
+		return todo.Int(), nil
+	case "in progress":
+		return inProgress.Int(), nil
+	case "done":
+		return done.Int(), nil
+	default:
+		return -1, fmt.Errorf("invalid status: %s", str)
+	}
+}
+
+func mkStatus(i int) string {
+	return [...]string{"todo", "in progress", "done"}[i]
 }
 
 type task struct {

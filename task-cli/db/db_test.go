@@ -10,32 +10,44 @@ import (
 	"testing"
 )
 
+var mockTasks = []task{
+	{
+		ID:          1,
+		Description: "get milk",
+		Status:      todo.String(),
+	},
+	{
+		ID:          2,
+		Description: "get eggs",
+		Status:      todo.String(),
+	},
+	{
+		ID:          3,
+		Description: "get bread",
+		Status:      todo.String(),
+	},
+}
+
 func TestGetTask(t *testing.T) {
 	tests := []struct {
 		want task
 	}{
 		{
-			want: task{
-				ID:      1,
-				Name:    "get milk",
-				Project: "groceries",
-				Status:  todo.String(),
-			},
+			want: mockTasks[0],
 		},
 		{
-			want: task{
-				ID:      1,
-				Name:    "get eggs",
-				Project: "groceries",
-				Status:  todo.String(),
-			},
+			want: mockTasks[1],
+		},
+		{
+			want: mockTasks[2],
 		},
 	}
+
 	for _, tc := range tests {
-		t.Run(tc.want.Name, func(t *testing.T) {
+		t.Run(tc.want.Description, func(t *testing.T) {
 			mockDB := setup()
 			defer teardown(mockDB)
-			if err := mockDB.insert(tc.want.Name, tc.want.Project); err != nil {
+			if err := mockDB.insert(tc.want.Description); err != nil {
 				t.Fatalf("we ran into an unexpected error: %v", err)
 			}
 			task, err := mockDB.getTask(tc.want.ID)
@@ -52,15 +64,77 @@ func TestGetTask(t *testing.T) {
 
 }
 
+func TestGetTasks(t *testing.T) {
+
+	t.Run("get all tasks", func(t *testing.T) {
+		mockDB := setup()
+		defer teardown(mockDB)
+		tasks, err := mockDB.getTasks()
+		if err != nil {
+			t.Fatalf("we ran into an unexpected error: %v", err)
+		}
+		if len(tasks) != len(mockTasks) {
+			t.Fatalf("got: %d, want: %d", len(tasks), len(mockTasks))
+		}
+	},
+	)
+}
+
+func TestDeleteTask(t *testing.T) {
+	tests := []struct {
+		want task
+	}{
+		{
+			want: mockTasks[0],
+		},
+		{
+			want: mockTasks[1],
+		},
+		{
+			want: mockTasks[2],
+		},
+	}
+
+	for _, tc := range tests {
+		t.Run(tc.want.Description, func(t *testing.T) {
+			mockDB := setup()
+			defer teardown(mockDB)
+			if err := mockDB.insert(tc.want.Description); err != nil {
+				t.Fatalf("we ran into an unexpected error: %v", err)
+			}
+			err := mockDB.deleteTask(tc.want.ID)
+			if err != nil {
+				t.Fatalf("we ran into an unexpected error: %v", err)
+			}
+			_, err = mockDB.getTask(tc.want.ID)
+			if err == nil {
+				t.Fatalf("task was not deleted")
+			}
+		})
+	}
+
+}
+
 func setup() *taskDB {
+
 	path := filepath.Join(os.TempDir(), "test.db")
 	db, err := sql.Open("sqlite3", path)
 	if err != nil {
 		log.Fatal(err)
 	}
 	t := taskDB{db, path}
+	log.Print("checking if table exists")
 	if !t.tableExists("tasks") {
+		log.Print("creating")
 		err := t.createTable()
+		if err != nil {
+			log.Fatal(err)
+		}
+	}
+
+	log.Print("seeding db")
+	for _, task := range mockTasks {
+		err := t.insert(task.Description)
 		if err != nil {
 			log.Fatal(err)
 		}

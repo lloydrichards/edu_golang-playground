@@ -2,39 +2,10 @@ package db
 
 import (
 	"database/sql"
-	"log"
-	"os"
 	"path/filepath"
-	"time"
 
 	_ "github.com/mattn/go-sqlite3"
-	gap "github.com/muesli/go-app-paths"
 )
-
-type status int
-
-const (
-	todo status = iota
-	inProgress
-	done
-)
-
-func (s status) String() string {
-	return [...]string{"todo", "in progress", "done"}[s]
-}
-
-type task struct {
-	ID      uint
-	Name    string
-	Project string
-	Status  string
-	Created time.Time
-}
-
-type taskDB struct {
-	db      *sql.DB
-	dataDir string
-}
 
 func OpenDB(path string) (*taskDB, error) {
 	db, err := sql.Open("sqlite3", filepath.Join(path, "tasks.db"))
@@ -51,76 +22,81 @@ func OpenDB(path string) (*taskDB, error) {
 	return &t, nil
 }
 
-func (t *taskDB) tableExists(name string) bool {
-	if _, err := t.db.Query("SELECT * FROM tasks"); err == nil {
-		return true
-	}
-	return false
-}
-
 func (t *taskDB) createTable() error {
-	_, err := t.db.Exec(`CREATE TABLE "tasks" ( "id" INTEGER, "name" TEXT NOT NULL, "project" TEXT, "status" TEXT, "created" DATETIME, PRIMARY KEY("id" AUTOINCREMENT))`)
+	sqlStmt := `
+		CREATE TABLE tasks (
+			"id" INTEGER PRIMARY KEY AUTOINCREMENT,
+			"description" TEXT NOT NULL,
+			"status" TEXT,
+			"created" DATETIME DEFAULT CURRENT_TIMESTAMP,
+			"updated" DATETIME
+		)`
+
+	_, err := t.db.Exec(sqlStmt)
 	return err
 }
 
-func (t *taskDB) insert(name, project string) error {
-	// We don't care about the returned values, so we're using Exec. If we
-	// wanted to reuse these statements, it would be more efficient to use
-	// prepared statements. Learn more:
-	// https://go.dev/doc/database/prepared-statements
-	_, err := t.db.Exec(
-		"INSERT INTO tasks(name, project, status, created) VALUES( ?, ?, ?, ?)",
+func (t *taskDB) insert(name string) error {
+	sqlStmt := `
+		INSERT INTO tasks (description, status)
+		VALUES ($1, $2)`
+
+	_, err := t.db.Exec(sqlStmt,
 		name,
-		project,
 		todo.String(),
-		time.Now())
+	)
 	return err
 }
 
 func (t *taskDB) getTasks() ([]task, error) {
-	return nil, nil
+	sqlStmt := `
+		SELECT * FROM tasks`
+
+	rows, err := t.db.Query(sqlStmt)
+	if err != nil {
+		return nil, err
+	}
+
+	var tasks []task
+	for rows.Next() {
+		var t task
+		err = rows.Scan(
+			&t.ID,
+			&t.Description,
+			&t.Status,
+			&t.Created,
+			&t.Updated,
+		)
+		if err != nil {
+			return nil, err
+		}
+		tasks = append(tasks, t)
+	}
+	return tasks, nil
 }
 
 func (t *taskDB) getTask(id uint) (task, error) {
 	var task task
-	err := t.db.QueryRow("SELECT * FROM tasks WHERE id = ?", id).
+	sqlStmt := `
+		SELECT * FROM tasks
+		WHERE id = $1`
+
+	err := t.db.QueryRow(sqlStmt, id).
 		Scan(
 			&task.ID,
-			&task.Name,
-			&task.Project,
+			&task.Description,
 			&task.Status,
 			&task.Created,
+			&task.Updated,
 		)
 	return task, err
 }
 
-func initTaskDir(path string) error {
-	_, err := os.Stat(path)
-	if err != nil {
-		if os.IsNotExist(err) {
-			return os.Mkdir(path, 0o770)
-		}
-		return err
-	}
-	return nil
-}
+func (t *taskDB) deleteTask(id uint) error {
+	sqlStmt := `
+		DELETE FROM tasks
+		WHERE id = $1`
 
-func SetupPath() string {
-	scope := gap.NewScope(gap.User, "tasks")
-	dirs, err := scope.DataDirs()
-	if err != nil {
-		log.Fatal(err)
-	}
-	var taskDir string
-	if len(dirs) > 0 {
-		taskDir = dirs[0]
-	} else {
-		taskDir, _ = os.UserHomeDir()
-	}
-
-	err = initTaskDir(taskDir)
-	if err != nil {
-		log.Fatal(err)
-	}
-	return taskDir
+	_, err := t.db.Exec(sqlStmt, id)
+	return err
 }
